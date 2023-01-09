@@ -1,7 +1,7 @@
 import { withLive } from "$live/live.ts";
 
 export const handler = withLive({
-  site: "start",
-  siteId: 8,
-  domains: [],
+  siteId: 450,
+  site: "agency-jobs",
+  domains: ["deco-sites-agency-jobs.deno.dev"],
 });
