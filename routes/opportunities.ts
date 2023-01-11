@@ -4,6 +4,7 @@ import { Opportunity } from '../architecture/Opportunity.ts'
 import { Scraper } from '../architecture/Scraper.ts'
 
 import { Maeztra } from '../scrapers/Maeztra.ts'
+import { Codeby } from "../scrapers/Codeby.ts";
 
 export const handler: Handlers = {
     GET: async () => {
@@ -11,7 +12,8 @@ export const handler: Handlers = {
             let opportunities : Opportunity[] = [] 
 
             const scrapers : Scraper[] = [
-                new Maeztra()
+                new Maeztra(),
+                new Codeby()
             ]
 
             await Promise.all(

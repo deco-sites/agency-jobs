@@ -41,7 +41,6 @@ export class Maeztra implements Scraper {
                 opportunities.push(
                     { 
                         title,
-                        subtitle: '',
                         description,
                         url: this.url,
                         source: {
