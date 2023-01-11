@@ -25,8 +25,6 @@ export class Maeztra implements Scraper {
                     .children('div.elementor-widget-container')
                     .children('h3').text().trim()
 
-            console.log(title)
-
             $(element)
                 .children('div.elementor-widget-text-editor')
                 .children('div.elementor-widget-container')

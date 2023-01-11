@@ -4,7 +4,10 @@ import { Opportunity } from '../architecture/Opportunity.ts'
 import { Scraper } from '../architecture/Scraper.ts'
 
 import { Maeztra } from '../scrapers/Maeztra.ts'
-import { Codeby } from "../scrapers/Codeby.ts";
+import { Codeby } from '../scrapers/Codeby.ts'
+import { Avanti } from '../scrapers/Avanti.ts'
+import { AgenciaMetodo } from '../scrapers/AgenciaMetodo.ts'
+import { Hibrido } from "../scrapers/Hibrido.ts";
 
 export const handler: Handlers = {
     GET: async () => {
@@ -13,7 +16,10 @@ export const handler: Handlers = {
 
             const scrapers : Scraper[] = [
                 new Maeztra(),
-                new Codeby()
+                new Codeby(),
+                new Avanti(),
+                new AgenciaMetodo(),
+                new Hibrido()
             ]
 
             await Promise.all(
