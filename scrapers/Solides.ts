@@ -83,15 +83,24 @@ export class Solides implements Scraper {
   parseDescription(description: string): string {
     let descriptionText = ''
     const $ = cheerio.load(description)
-    $('p').each((_, element) => {
+
+    $('p, ul').each((_, element) => {
       if (descriptionText != '') descriptionText += '\n\n'
 
-      descriptionText += $(element)
-        .find('br')
-        .replaceWith('\n')
-        .end()
-        .text()
-        .trim()
+      if (element.name == 'p') {
+        descriptionText += $(element)
+          .find('br')
+          .replaceWith('\n')
+          .end()
+          .text()
+          .trim()
+      } else if (element.name == 'ul') {
+        $(element)
+          .children('li')
+          .each((_, li) => {
+            descriptionText += ' - ' + $(li).text().trim() + '\n'
+          })
+      }
     })
 
     return descriptionText
