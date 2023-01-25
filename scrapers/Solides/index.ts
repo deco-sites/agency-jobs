@@ -1,3 +1,5 @@
+import * as cheerio from "https://esm.sh/cheerio@1.0.0-rc.12"
+
 import { Opportunity } from '../../architecture/Opportunity.ts'
 import { Scraper } from "../../architecture/Scraper.ts";
 
@@ -8,6 +10,7 @@ type SolidesResponse = {
 }
 
 type Vacancy = {
+    id: number
     name: string
     city: {
         name: string
@@ -17,7 +20,8 @@ type Vacancy = {
     }
     pcdOnly: boolean
     linkVacancy: string
-    availablePositions: number
+    availablePositions: number,
+    description?: string
 }
 
 export abstract class SolidesScraper implements Scraper {
@@ -53,28 +57,31 @@ export abstract class SolidesScraper implements Scraper {
 
     private async getVacancies(page: number) {
 
-        const opportunities : Opportunity[] = []
-
         try {
             const { data } = await fetch(this.url + `&page=${page}`).then(res => res.json()) as SolidesResponse
             
             return await Promise.all(
-                data.map((vacancy) => this.getOpportunity(vacancy))
+                // data.map((vacancy) => this.getOpportunity(vacancy))
+                [this.getOpportunity(data[0])]
             )
+            .then((opportunities) => opportunities)
+            .catch(() => [])
         } catch(e) {
             console.log(e)
         }
 
-        return opportunities
+        return []
     }
 
-    private getOpportunity(vacancy: Vacancy) : Opportunity {
+    private async getOpportunity(vacancy: Vacancy) : Promise<Opportunity> {
         
         let subtitle = vacancy.city.name + ' / ' + vacancy.state.acronym + ' | Vagas: ' + vacancy.availablePositions
         
         if(vacancy.pcdOnly) subtitle += ' | PCD'
         
-        const description = this.getDescription()
+        const description = await this.getDescription(vacancy.id)
+
+        console.log(description)
 
         return {
             title: vacancy.name,
@@ -85,10 +92,39 @@ export abstract class SolidesScraper implements Scraper {
         }
     }
 
-    private getDescription() {        
-        // o html está vindo vazio porque o fetch não roda o javascript
-        const description = ''
+    private async getDescription(id: number) {        
 
+        const response = await fetch(`https://api.solides.jobs/v2/vacancy/${id}`).then(res => res.json())
+
+        if(!response?.data) return ''
+
+        const data = response.data as Vacancy
+        if(!data.description) return ''
+
+        const $ = cheerio.load(data.description) 
+
+        let description = ''
+
+        $('p, ul').each((_, element) => {
+            if (description != '') description += '\n'
+      
+            if (element.tagName == 'p') {
+              description += '\n' + $(element)
+                                    .find('br')
+                                    .replaceWith('\n')
+                                    .end()
+                                    .text()
+                                    .trim()
+            }
+            
+            else if (element.tagName == 'ul') {
+              $(element)
+                .children('li')
+                .each((_, li) => {
+                  description += ' - ' + $(li).text().trim() + '\n'
+                })
+            }
+        })
 
         return description
     }
