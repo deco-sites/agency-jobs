@@ -3,7 +3,7 @@ import * as cheerio from "https://esm.sh/cheerio@1.0.0-rc.12"
 import { Opportunity } from '../architecture/Opportunity.ts'
 import { Scraper } from '../architecture/Scraper.ts'
 
-export class Maeztra implements Scraper {
+class MaeztraScraper implements Scraper {
     
     url = "https://maeztra.com/vagas/"
 
@@ -56,3 +56,5 @@ export class Maeztra implements Scraper {
         return opportunities
     }
 }
+
+export const Maeztra = new MaeztraScraper()

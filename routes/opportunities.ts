@@ -8,8 +8,6 @@ import { Codeby } from '../scrapers/Codeby.ts'
 import { Avanti } from '../scrapers/Avanti.ts'
 import { AgenciaMetodo } from '../scrapers/AgenciaMetodo.ts'
 import { Hibrido } from '../scrapers/Hibrido.ts'
-import { Solides } from '../scrapers/Solides.ts'
-import { M3 } from '../scrapers/M3.ts'
 
 export const handler: Handlers = {
   GET: async () => {
@@ -17,13 +15,11 @@ export const handler: Handlers = {
       let opportunities: Opportunity[] = []
 
       const scrapers: Scraper[] = [
-        new Maeztra(),
-        new Codeby(),
-        new Avanti(),
-        new AgenciaMetodo(),
-        new Hibrido(),
-        new Solides(),
-        new M3(),
+        Maeztra,
+        Codeby,
+        Avanti,
+        AgenciaMetodo,
+        Hibrido,
       ]
 
       await Promise.all(scrapers.map((scraper) => scraper.execute())).then(
