@@ -61,8 +61,7 @@ export abstract class SolidesScraper implements Scraper {
             const { data } = await fetch(this.url + `&page=${page}`).then(res => res.json()) as SolidesResponse
             
             return await Promise.all(
-                // data.map((vacancy) => this.getOpportunity(vacancy))
-                [this.getOpportunity(data[0])]
+                data.map((vacancy) => this.getOpportunity(vacancy))
             )
             .then((opportunities) => opportunities)
             .catch(() => [])
@@ -106,18 +105,16 @@ export abstract class SolidesScraper implements Scraper {
         let description = ''
 
         $('p, ul').each((_, element) => {
-            if (description != '') description += '\n'
+            if (description != '') description += '\n\n'
       
-            if (element.tagName == 'p') {
-              description += '\n' + $(element)
-                                    .find('br')
-                                    .replaceWith('\n')
-                                    .end()
-                                    .text()
-                                    .trim()
-            }
-            
-            else if (element.tagName == 'ul') {
+            if (element.name == 'p') {
+              description += $(element)
+                .find('br')
+                .replaceWith('\n')
+                .end()
+                .text()
+                .trim()
+            } else if (element.name == 'ul') {
               $(element)
                 .children('li')
                 .each((_, li) => {
