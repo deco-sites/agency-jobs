@@ -8,10 +8,12 @@ import { Codeby } from '../scrapers/Codeby.ts'
 import { Avanti } from '../scrapers/Avanti.ts'
 import { AgenciaMetodo } from '../scrapers/AgenciaMetodo.ts'
 import { Hibrido } from '../scrapers/Hibrido.ts'
+import { M3 } from '../scrapers/M3.ts'
 
 export const handler: Handlers = {
   GET: async () => {
     try {
+        
       let opportunities: Opportunity[] = []
 
       const scrapers: Scraper[] = [
@@ -20,6 +22,7 @@ export const handler: Handlers = {
         Avanti,
         AgenciaMetodo,
         Hibrido,
+        M3
       ]
 
       await Promise.all(scrapers.map((scraper) => scraper.execute())).then(
@@ -31,6 +34,7 @@ export const handler: Handlers = {
       )
 
       return Response.json({ opportunities })
+      
     } catch (e) {
       console.log(e)
       return Response.error()
