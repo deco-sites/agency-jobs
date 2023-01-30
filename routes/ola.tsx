@@ -12,11 +12,11 @@ type Opportunity = {
 export const handler: Handlers = {
   GET: async (req, ctx) => {
     const originalPromise = fetch(
-      "https://api.solides.jobs/v2/vacancy/search?reference_id=61196&search=&page=1&pagination=25&vacancyType=jobs"
+      "https://api.solides.jobs/v2/vacancy/search?reference_id=61196&search=&page=1&pagination=25&vacancyType=jobs",
     ).then((r) => r.json());
 
     const outraOrgPromise = fetch(
-      "https://api.solides.jobs/v2/vacancy/search?reference_id=92&search=&page=1&pagination=25&vacancyType=jobs"
+      "https://api.solides.jobs/v2/vacancy/search?reference_id=92&search=&page=1&pagination=25&vacancyType=jobs",
     ).then((r) => r.json());
 
     const [original, outra] = await Promise.all([

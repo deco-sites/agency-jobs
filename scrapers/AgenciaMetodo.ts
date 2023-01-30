@@ -1,76 +1,73 @@
-import * as cheerio from "https://esm.sh/cheerio@1.0.0-rc.12"
+import * as cheerio from "https://esm.sh/cheerio@1.0.0-rc.12";
 
-import { Opportunity } from '../architecture/Opportunity.ts'
-import { Scraper } from '../architecture/Scraper.ts'
+import { Opportunity } from "../architecture/Opportunity.ts";
+import { Scraper } from "../architecture/Scraper.ts";
 
 export class AgenciaMetodo implements Scraper {
+  url = "https://penseavanti.enlizt.me/";
 
-    url = "https://penseavanti.enlizt.me/"
+  async execute() {
+    const opportunities: Opportunity[] = [];
 
-    async execute() {
-        
-        const opportunities: Opportunity[] = []
-        
-        const res = await fetch(this.url)
-        const html = await res.text()
-        
-        const $ = cheerio.load(html)  
-                    
-        const elements = $('.job_listings > ul.job-list > li > a')
-    
-        for (const element of elements) {
-            await this.getOpportunityFromPage( element.attribs.href )
-                .then((opportunity) => {
-                    opportunities.push(opportunity)
-                })
-        }
-        
-        return opportunities
+    const res = await fetch(this.url);
+    const html = await res.text();
+
+    const $ = cheerio.load(html);
+
+    const elements = $(".job_listings > ul.job-list > li > a");
+
+    for (const element of elements) {
+      await this.getOpportunityFromPage(element.attribs.href)
+        .then((opportunity) => {
+          opportunities.push(opportunity);
+        });
     }
 
-    async getOpportunityFromPage(url: string) : Promise<Opportunity> {
+    return opportunities;
+  }
 
-        let title = ''        
-        let subtitle = ''
-        let description = ''
+  async getOpportunityFromPage(url: string): Promise<Opportunity> {
+    let title = "";
+    let subtitle = "";
+    let description = "";
 
-        const res = await fetch(url)
-        const html = await res.text()
-        
-        const $ = cheerio.load(html)
+    const res = await fetch(url);
+    const html = await res.text();
 
-        $('div.job_description > p').each(function () {
-            if(description != '') description += '\n'
-            
-            const element = $(this)
-            const isStrong = !!element.children('strong').text().trim()
+    const $ = cheerio.load(html);
 
-            if(isStrong && description != '') description += '\n' 
-            description += element.text()
-            if(isStrong) description += '\n'
-        })
+    $("div.job_description > p").each(function () {
+      if (description != "") description += "\n";
 
-        $('#job-details .job-overview > ul > li > div').each(function () {
-            if(subtitle != '') subtitle += ' | '
-            const element = $(this)
+      const element = $(this);
+      const isStrong = !!element.children("strong").text().trim();
 
-            const job_details_title = element.children('strong').text().trim()
-            const job_details_value = element.children('span').text().trim()
+      if (isStrong && description != "") description += "\n";
+      description += element.text();
+      if (isStrong) description += "\n";
+    });
 
-            if(job_details_title.toLowerCase().includes('cargo')) title = job_details_value
-            else subtitle += job_details_title + ' ' + job_details_value
-        })
+    $("#job-details .job-overview > ul > li > div").each(function () {
+      if (subtitle != "") subtitle += " | ";
+      const element = $(this);
 
-        return {
-            title,
-            subtitle,
-            description,
-            url,
-            source: {
-                name: 'Agencia Método',
-                url: this.url
-            }
-        }
-    }
+      const job_details_title = element.children("strong").text().trim();
+      const job_details_value = element.children("span").text().trim();
 
+      if (job_details_title.toLowerCase().includes("cargo")) {
+        title = job_details_value;
+      } else subtitle += job_details_title + " " + job_details_value;
+    });
+
+    return {
+      title,
+      subtitle,
+      description,
+      url,
+      source: {
+        name: "Agencia Método",
+        url: this.url,
+      },
+    };
+  }
 }
