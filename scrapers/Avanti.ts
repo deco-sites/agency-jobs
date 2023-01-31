@@ -3,7 +3,7 @@ import * as cheerio from "https://esm.sh/cheerio@1.0.0-rc.12"
 import { Opportunity } from '../architecture/Opportunity.ts'
 import { Scraper } from '../architecture/Scraper.ts'
 
-export class Avanti implements Scraper {
+class AvantiScraper implements Scraper {
 
     url = "https://penseavanti.enlizt.me/"
 
@@ -99,3 +99,5 @@ export class Avanti implements Scraper {
     }
 
 }
+
+export const Avanti = new AvantiScraper()

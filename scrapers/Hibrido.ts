@@ -3,7 +3,7 @@ import * as cheerio from "https://esm.sh/cheerio@1.0.0-rc.12"
 import { Opportunity } from '../architecture/Opportunity.ts'
 import { Scraper } from '../architecture/Scraper.ts'
 
-export class Hibrido implements Scraper {
+class HibridoScraper implements Scraper {
 
     url = "https://hibrido.gupy.io/"
 
@@ -85,3 +85,5 @@ export class Hibrido implements Scraper {
     }
 
 }
+
+export const Hibrido = new HibridoScraper()
