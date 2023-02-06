@@ -1,71 +1,74 @@
-import * as cheerio from "https://esm.sh/cheerio@1.0.0-rc.12";
+import * as cheerio from 'https://esm.sh/cheerio@1.0.0-rc.12'
 
-import { Opportunity } from "../architecture/Opportunity.ts";
-import { Scraper } from "../architecture/Scraper.ts";
+import { Opportunity } from '../architecture/Opportunity.ts'
+import { Scraper } from '../architecture/Scraper.ts'
+import { createHashId } from '../utils/utils.ts'
 
 export class Codeby implements Scraper {
-  url = "https://codeby.global/pages/vagas/";
+  url = 'https://codeby.global/pages/vagas/'
 
   async execute() {
-    const opportunities: Opportunity[] = [];
+    const opportunities: Opportunity[] = []
 
-    const res = await fetch(this.url);
-    const html = await res.text();
+    const res = await fetch(this.url)
+    const html = await res.text()
 
-    const $ = cheerio.load(html);
+    const $ = cheerio.load(html)
 
-    const element = $("main > section > div > div.rte");
+    const element = $('main > section > div > div.rte')
 
-    let title = "";
-    let description = "";
+    let title = ''
+    let description = ''
 
-    element.children().each((_, child) => {
-      if (child.tagName == "h2") {
-        const text = $(child).text().trim();
-        if (text) title = text;
-      } else if (child.tagName == "hr") {
-        opportunities.push(
-          {
-            title,
-            description,
+    element.children().each(async (_, child) => {
+      if (child.tagName == 'h2') {
+        const text = $(child).text().trim()
+        if (text) title = text
+      } else if (child.tagName == 'hr') {
+        const _id = await createHashId(title, description)
+        opportunities.push({
+          _id,
+          title,
+          description,
+          url: this.url,
+          source: {
+            name: 'CodeBy',
             url: this.url,
-            source: {
-              name: "CodeBy",
-              url: this.url,
-            },
           },
-        );
+        })
 
-        title = "";
-        description = "";
+        title = ''
+        description = ''
       } else {
-        if (child.tagName == "div") {
-          const parsed = $(child);
-          const text = parsed.text().trim();
+        if (child.tagName == 'div') {
+          const parsed = $(child)
+          const text = parsed.text().trim()
           if (text) {
-            description += "\n";
+            description += '\n'
 
-            if (parsed.children("strong").length == 1) {
-              description += "\n" + parsed.text().trim() + "\n";
+            if (parsed.children('strong').length == 1) {
+              description += '\n' + parsed.text().trim() + '\n'
             } else {
-              description += text;
+              description += text
             }
           }
-        } else if (child.tagName == "ul") {
-          $(child).children("li").each((_, li) => {
-            description += "\n - " + $(li).text().trim();
-          });
-        } else if (child.tagName == "p") {
-          const parsed = $(child);
-          const text = parsed.text().trim();
-          if (text && text != "&nbsp;") {
-            description += "\n";
-            description += "\n" + text + "\n";
+        } else if (child.tagName == 'ul') {
+          $(child)
+            .children('li')
+            .each((_, li) => {
+              description += '\n - ' + $(li).text().trim()
+            })
+        } else if (child.tagName == 'p') {
+          const parsed = $(child)
+          const text = parsed.text().trim()
+          if (text && text != '&nbsp;') {
+            description += '\n'
+            description += '\n' + text + '\n'
           }
         }
       }
-    });
+    })
 
-    return opportunities;
+    return opportunities
   }
 }
