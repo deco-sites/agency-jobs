@@ -38,15 +38,15 @@ export const handler: Handlers = {
         },
       );
 
-      const supabase = createClient(supabaseUrl, supabaseKey);
+      // const supabase = createClient(supabaseUrl, supabaseKey);
 
-      const { error } = await supabase
-        .from("opportunities")
-        .insert(opportunities);
+      // const { error } = await supabase
+      //   .from('opportunities')
+      //   .insert(opportunities)
 
-      if (error == null) {
-        console.log("inserted into the database successfully");
-      }
+      // if (error == null) {
+      //   console.log('inserted into the database successfully')
+      // }
 
       return Response.json({ opportunities });
     } catch (e) {

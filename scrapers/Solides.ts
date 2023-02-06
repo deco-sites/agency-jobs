@@ -57,6 +57,7 @@ export class Solides implements Scraper {
         const data = vacancy.data;
 
         opportunities.push({
+          _id: "",
           title: data.title,
           description: this.parseDescription(data.description),
           url: data.linkVacancy,

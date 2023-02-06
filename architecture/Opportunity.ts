@@ -1,11 +1,11 @@
 export interface Opportunity {
-  _id: string
-  title: string
-  subtitle?: string
-  description: string
-  url: string
+  _id: string;
+  title: string;
+  subtitle?: string;
+  description: string;
+  url: string;
   source: {
-    name: string
-    url: string
-  }
+    name: string;
+    url: string;
+  };
 }

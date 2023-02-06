@@ -2,12 +2,13 @@ import * as cheerio from "https://esm.sh/cheerio@1.0.0-rc.12";
 
 import { Opportunity } from "../architecture/Opportunity.ts";
 import { Scraper } from "../architecture/Scraper.ts";
+import { createHashId } from "../utils/utils.ts";
 
 export class M3 implements Scraper {
   url = "https://m3ecommerce.com/trabalhe-conosco/";
 
   async execute() {
-    const opportunities: Opportunity[] = [];
+    let opportunities: Opportunity[] = [];
 
     const res = await fetch(this.url);
     const html = await res.text();
@@ -46,8 +47,9 @@ export class M3 implements Scraper {
         "\n\nLINK DO FORMULÁRIO: https://app.pipefy.com/public/form/cjJmu6-g";
 
       opportunities.push({
-        title: title,
-        description: description,
+        _id: "",
+        title,
+        description,
         url: this.url,
         source: {
           name: "M3",
@@ -55,6 +57,18 @@ export class M3 implements Scraper {
         },
       });
     });
+
+    opportunities = await Promise.all(
+      opportunities.map(async (o: Opportunity) => {
+        let { _id, ...opportunityWithoutId } = o;
+
+        _id = await createHashId(o.title, o.description);
+        return {
+          _id,
+          ...opportunityWithoutId,
+        };
+      }),
+    );
 
     return opportunities;
   }
