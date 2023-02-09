@@ -80,8 +80,6 @@ export abstract class SolidesScraper implements Scraper {
         
         const description = await this.getDescription(vacancy.id)
 
-        console.log(description)
-
         return {
             title: vacancy.name,
             subtitle,
