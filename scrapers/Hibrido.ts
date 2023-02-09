@@ -17,11 +17,11 @@ class HibridoScraper implements Scraper {
         const $ = cheerio.load(html)  
                     
         const elements = $('section#job-listing > ul > li > a')
-    
+
         for (const element of elements) {
             if(element.attribs?.href) {
                 const hrefWithoutFirstBar = element.attribs.href.slice(1)
-                await this.getOpportunityFromPage( this.url + hrefWithoutFirstBar )
+                await this.getOpportunityFromPage( this.url + hrefWithoutFirstBar)
                     .then((opportunity) => {
                         opportunities.push(opportunity)
                     })
@@ -42,18 +42,15 @@ class HibridoScraper implements Scraper {
         
         const $ = cheerio.load(html)
 
-        $('#__next > header > div > div').each((index, element) => {
-            if(index == 1) {
-                title = $(element).children('h1').text().trim()
-            } else if (index == 2) {
-                $(element).children('div').children('span').each((_, span) => {
-                    if(subtitle != '') subtitle += ' | '
-                    subtitle += $(span).text()
-                })
-            }
+        title = $('#__next > main > section > section:first > h1').text().trim()
+
+
+        $('#__next > main > section > section:first > div:last > p').each((_, element) => {
+            if(subtitle != '') subtitle += ' | '
+            subtitle += $(element).text()
         })
 
-        $('#__next > main > section > div[data-testid="text-section"]').each((_, element) => {
+        $('#__next > main > section > section > div[data-testid="text-section"]').each((_, element) => {
             
             const parsed = $(element)
 
