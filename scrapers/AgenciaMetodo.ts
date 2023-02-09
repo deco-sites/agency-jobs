@@ -5,7 +5,7 @@ import { Scraper } from '../architecture/Scraper.ts'
 
 class AgenciaMetodoScraper implements Scraper {
 
-    url = "https://penseavanti.enlizt.me/"
+    url = "https://talentos.agenciametodo.com/"
 
     async execute() {
         
@@ -24,7 +24,7 @@ class AgenciaMetodoScraper implements Scraper {
                     opportunities.push(opportunity)
                 })
         }
-        
+
         return opportunities
     }
 
