@@ -58,8 +58,6 @@ class AgenciaMetodoScraper implements Scraper {
             }
         })
 
-        console.log(description)
-
         $('#job-details .job-overview > ul > li > div').each(function () {
             if(subtitle != '') subtitle += ' | '
             const element = $(this)
