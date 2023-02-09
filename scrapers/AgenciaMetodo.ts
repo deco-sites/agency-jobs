@@ -39,16 +39,26 @@ class AgenciaMetodoScraper implements Scraper {
         
         const $ = cheerio.load(html)
 
-        $('div.job_description > p').each(function () {
+        $('div.job_description').children().each((_, child) => {
             if(description != '') description += '\n'
             
-            const element = $(this)
-            const isStrong = !!element.children('strong').text().trim()
+            const element = $(child)
 
-            if(isStrong && description != '') description += '\n' 
-            description += element.text()
-            if(isStrong) description += '\n'
+            if(child.tagName == 'p') {
+                const isStrong = !!element.children('strong').text().trim()
+    
+                if(isStrong && description != '') description += '\n' 
+                description += element.text()
+                if(isStrong) description += '\n'
+            }
+            else if (child.tagName == 'ul' ) {
+                element.children('li').each((_, li) => {
+                    description += '\n - ' + $(li).text()
+                })
+            }
         })
+
+        console.log(description)
 
         $('#job-details .job-overview > ul > li > div').each(function () {
             if(subtitle != '') subtitle += ' | '
