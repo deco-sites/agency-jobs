@@ -1,107 +1,107 @@
-import type { Handlers } from "$fresh/server.ts";
+import type { Handlers } from '$fresh/server.ts'
 
-import { Opportunity } from "../architecture/Opportunity.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@1.35.4";
+import { Opportunity } from '../architecture/Opportunity.ts'
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@1.35.4'
 
-import * as scrapers from "../scrapers/index.ts";
+import * as scrapers from '../scrapers/index.ts'
 
-const supabaseUrl: string = Deno.env.get("SUPABASE_URL") || "";
-const supabaseKey: string = Deno.env.get("SUPABASE_KEY") || "";
+const supabaseUrl: string = Deno.env.get('SUPABASE_URL') || ''
+const supabaseKey: string = Deno.env.get('SUPABASE_KEY') || ''
 
 export const handler: Handlers = {
   GET: async () => {
     try {
-      let opportunities: Opportunity[] = [];
+      let opportunities: Opportunity[] = []
 
       await Promise.all(
         Object.entries(scrapers).map(([_, object]) => object.execute()),
       ).then((results) => {
         for (const result of results) {
-          opportunities = opportunities.concat(result);
+          opportunities = opportunities.concat(result)
         }
-      });
+      })
 
-      const supabase = createClient(supabaseUrl, supabaseKey);
+      const supabase = createClient(supabaseUrl, supabaseKey)
 
       const { error } = await supabase
-        .from("opportunities")
-        .insert(opportunities);
+        .from('opportunities')
+        .insert(opportunities)
 
       if (error == null) {
-        console.log("inserted into the database successfully");
+        console.log('inserted into the database successfully')
       }
 
-      return Response.json({ opportunities });
+      return Response.json({ opportunities })
     } catch (e) {
-      console.log(e);
-      return Response.error();
+      console.log(e)
+      return Response.error()
     }
   },
   POST: async () => {
     try {
-      const supabase = createClient(supabaseUrl, supabaseKey);
+      const supabase = createClient(supabaseUrl, supabaseKey)
 
       const { data: opportunities, error } = await supabase
-        .from("opportunities")
-        .select("*")
-        .is("posted", false);
+        .from('opportunities')
+        .select('*')
+        .is('posted', false)
 
       if (error != null) {
         return Response.json({
-          message: "error when trying to get opportunities from the DB",
-        });
+          message: 'error when trying to get opportunities from the DB',
+        })
       }
 
-      const timer = (ms: number) => new Promise((res) => setTimeout(res, ms));
+      const timer = (ms: number) => new Promise((res) => setTimeout(res, ms))
 
       for (let index = 0; index < opportunities.length; index++) {
-        const o = opportunities[index];
+        const o = opportunities[index]
 
-        let description = "";
+        let description = ''
         if (o.description.length > 1700) {
-          description = `${
-            o.description.slice(
-              0,
-              1700,
-            )
-          }...\n Acesse a vaga para ver todos os detalhes.\n Link para a vaga: ${o.url}`;
+          description = `${o.description.slice(
+            0,
+            1700,
+          )}...\n Acesse a vaga para ver todos os detalhes.\n Link para a vaga: ${
+            o.url
+          }`
         } else {
-          description = o.description + "\n Link para a vaga: " + o.url;
+          description = o.description + '\n Link para a vaga: ' + o.url
         }
 
         const data = {
           content: description,
-          username: "Vagas de Emprego",
+          username: 'Vagas de Emprego',
           thread_name: o.title,
-        };
+        }
 
         const res = await fetch(
-          "https://discord.com/api/webhooks/1065085478933643324/BOMeFIEfkhym1ZP0rATF0WMlR10JQsc18axzFZAzdLjwPKG5ggQGyw_FXSgK0LcWuddZ",
+          'https://discord.com/api/webhooks/1067981933449056258/VxgV33f0iUdJAhOKBdsALZAxTfHhVzWv-eTrMDPK4vjYL2rIZiBeegrzDoqgu4q_0QK1',
           {
-            method: "POST",
+            method: 'POST',
             headers: {
-              "Content-Type": "application/json",
+              'Content-Type': 'application/json',
             },
             body: JSON.stringify(data),
           },
-        );
+        )
 
         if (res.status == 204) {
           await supabase
-            .from("opportunities")
+            .from('opportunities')
             .update({ posted: true })
-            .eq("_id", o._id);
+            .eq('_id', o._id)
         }
 
-        await timer(3000);
+        await timer(3000)
       }
 
       return Response.json({
-        message: "sending opportunities to discord channel",
-      });
+        message: 'sending opportunities to discord channel',
+      })
     } catch (e) {
-      console.log(e);
-      return Response.error();
+      console.log(e)
+      return Response.error()
     }
   },
-};
+}
