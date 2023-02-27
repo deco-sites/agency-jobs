@@ -1,127 +1,136 @@
-import * as cheerio from "https://esm.sh/cheerio@1.0.0-rc.12"
+import * as cheerio from "https://esm.sh/cheerio@1.0.0-rc.12";
 
-import { Opportunity } from '../../architecture/Opportunity.ts'
+import { Opportunity } from "../../architecture/Opportunity.ts";
 import { Scraper } from "../../architecture/Scraper.ts";
+import { createHashId } from "../../utils/utils.ts";
 
-type SolidesResponse = { 
-    code_request_jobs: number
-    totalPages: number
-    data: Vacancy[]
-}
+type SolidesResponse = {
+  code_request_jobs: number;
+  totalPages: number;
+  data: Vacancy[];
+};
 
 type Vacancy = {
-    id: number
-    name: string
-    city: {
-        name: string
-    },
-    state: {
-        acronym: string
-    }
-    pcdOnly: boolean
-    linkVacancy: string
-    availablePositions: number,
-    description?: string
-}
+  id: number;
+  name: string;
+  city: {
+    name: string;
+  };
+  state: {
+    acronym: string;
+  };
+  pcdOnly: boolean;
+  linkVacancy: string;
+  availablePositions: number;
+  description?: string;
+};
 
 export abstract class SolidesScraper implements Scraper {
+  url = "";
+  source = {
+    name: "",
+    url: "",
+  };
 
-    url = ''
-    source = {
-        name: '',
-        url: '' 
+  async execute() {
+    let opportunities: Opportunity[] = [];
+
+    try {
+      const { totalPages } = (await fetch(this.url).then((res) =>
+        res.json()
+      )) as SolidesResponse;
+
+      const pages = Array.from({ length: totalPages }, (_, i) => i + 1);
+
+      await Promise.all(pages.map((page) => this.getVacancies(page))).then(
+        (results) => {
+          for (const result of results) {
+            opportunities = opportunities.concat(result);
+          }
+        },
+      );
+    } catch (e) {
+      console.log(e);
     }
 
-    async execute() {
-        let opportunities : Opportunity[] = []
+    return opportunities;
+  }
 
-        try {
-            const { totalPages } = await fetch(this.url).then(res => res.json()) as SolidesResponse
-            
-            const pages = Array.from({length: totalPages}, (_, i) => i + 1)
+  private async getVacancies(page: number) {
+    try {
+      const { data } = (await fetch(this.url + `&page=${page}`).then((res) =>
+        res.json()
+      )) as SolidesResponse;
 
-            await Promise.all(
-                pages.map((page) => this.getVacancies(page))
-            ).then((results) => {
-                for (const result of results) {
-                    opportunities = opportunities.concat(result)
-                }
-            })
-
-        } catch(e) {
-            console.log(e)
-        }
-        
-        return opportunities
+      return await Promise.all(
+        data.map((vacancy) =>
+          this.getOpportunity(vacancy)
+        ),
+      )
+        .then((opportunities) => opportunities)
+        .catch(() => []);
+    } catch (e) {
+      console.log(e);
     }
 
-    private async getVacancies(page: number) {
+    return [];
+  }
 
-        try {
-            const { data } = await fetch(this.url + `&page=${page}`).then(res => res.json()) as SolidesResponse
-            
-            return await Promise.all(
-                data.map((vacancy) => this.getOpportunity(vacancy))
-            )
-            .then((opportunities) => opportunities)
-            .catch(() => [])
-        } catch(e) {
-            console.log(e)
-        }
+  private async getOpportunity(vacancy: Vacancy): Promise<Opportunity> {
+    let subtitle = vacancy.city.name +
+      " / " +
+      vacancy.state.acronym +
+      " | Vagas: " +
+      vacancy.availablePositions;
 
-        return []
-    }
+    if (vacancy.pcdOnly) subtitle += " | PCD";
 
-    private async getOpportunity(vacancy: Vacancy) : Promise<Opportunity> {
-        
-        let subtitle = vacancy.city.name + ' / ' + vacancy.state.acronym + ' | Vagas: ' + vacancy.availablePositions
-        
-        if(vacancy.pcdOnly) subtitle += ' | PCD'
-        
-        const description = await this.getDescription(vacancy.id)
+    const description = await this.getDescription(vacancy.id);
 
-        return {
-            title: vacancy.name,
-            subtitle,
-            description,
-            url: vacancy.linkVacancy,
-            source: this.source
-        }
-    }
+    const _id = await createHashId(vacancy.name, subtitle, description);
+    return {
+      _id,
+      title: vacancy.name,
+      subtitle,
+      description,
+      url: vacancy.linkVacancy,
+      source: this.source,
+    };
+  }
 
-    private async getDescription(id: number) {        
+  private async getDescription(id: number) {
+    const response = await fetch(
+      `https://api.solides.jobs/v2/vacancy/${id}`,
+    ).then((res) => res.json());
 
-        const response = await fetch(`https://api.solides.jobs/v2/vacancy/${id}`).then(res => res.json())
+    if (!response?.data) return "";
 
-        if(!response?.data) return ''
+    const data = response.data as Vacancy;
+    if (!data.description) return "";
 
-        const data = response.data as Vacancy
-        if(!data.description) return ''
+    const $ = cheerio.load(data.description);
 
-        const $ = cheerio.load(data.description) 
+    let description = "";
 
-        let description = ''
+    $("p, ul").each((_, element) => {
+      if (description != "") description += "\n\n";
 
-        $('p, ul').each((_, element) => {
-            if (description != '') description += '\n\n'
-      
-            if (element.name == 'p') {
-              description += $(element)
-                .find('br')
-                .replaceWith('\n')
-                .end()
-                .text()
-                .trim()
-            } else if (element.name == 'ul') {
-              $(element)
-                .children('li')
-                .each((_, li) => {
-                  description += ' - ' + $(li).text().trim() + '\n'
-                })
-            }
-        })
+      if (element.name == "p") {
+        description += $(element)
+          .find("br")
+          .replaceWith("\n")
+          .end()
+          .text()
+          .trim();
+      } else if (element.name == "ul") {
+        $(element)
+          .children("li")
+          .each((_, li) => {
+            description += " - " + $(li).text().trim() + "\n";
+          });
+      }
+    });
 
-        return description
-    }
-
+    return description;
+  }
 }
