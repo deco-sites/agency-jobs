@@ -1,26 +1,34 @@
-# Deco Start — live template
+# 🇧🇷 Agency Jobs — WebScrapper
 
-Welcome to your live site!
+Um serviço para capturar vagas de empregos de diversos sites e publica-las como threads no discord.
 
-This repository was created for you when you created a new site. To edit the
-code of the components in this site, you may clone this repo and run the project
-locally.
+## Arquitetura:
+Vamos trabalhar com duas interfaces nesse projeto `Scraper` e `Opportunity`. 
+#### Scraper 
+Intuíto: Ser implementada por objetos que são capazes de acessar um url e pegar vagas. `Scraper` nos dá uma array de `Opportunity`
+#### Opportunity
+Intuíto: Resepresentar uma vaga de emprego, contendo: título, subtítulo, descrição, url, e a origem da vaga sendo a empresa e a url de mais vagas dessa empresa.
 
----
+## Como isso funciona?
 
-NOTE: To edit or create new pages with existing components, you don't need to
-edit the code! Just go to any page and hit `Ctrl+Shift+E` to open the editor of
-the current page you're seeing.
+Em [routes/opportunies](https://github.com/deco-sites/agency-jobs/blob/main/routes/opportunities.ts) você vai encontrar a implementação de duas rotas.
 
----
+#### GET
+Objetivo: Pegar as vagas de emprego dos sites
+Como está implementado? Tendo uma lista de `Scrapers` vamos executar esses scrapers para que busquem as vagas em seu site. Tendo cada um retornado com suas vagas, cadastramos essa vaga no banco e devolvemos a lista completa para o cliente.
 
-## Usage
+#### POST
+Objetivo: Publicar as vagas de emprego no discord
+Como está implementado? 
 
-Start the project:
+Tendo falado das rotas, vamos agora explicar qual a necessidade do banco
+
+## Variáveis de Ambiente
+
+SUPABASE_URL | SUPABASE_KEY | DISCORD_WEBHOOK
+
+## Como executar
 
 ```sh
 deno task start
 ```
-
-Navigate to `https://localhost:8080` to see your site and start creating new
-components.
