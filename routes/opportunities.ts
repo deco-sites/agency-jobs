@@ -7,6 +7,7 @@ import * as scrapers from '../scrapers/index.ts'
 
 const supabaseUrl: string = Deno.env.get('SUPABASE_URL') || ''
 const supabaseKey: string = Deno.env.get('SUPABASE_KEY') || ''
+const discordWebhook: string = Deno.env.get('DISCORD_WEBHOOK') || ''
 
 export const handler: Handlers = {
   GET: async () => {
@@ -76,7 +77,7 @@ export const handler: Handlers = {
         }
 
         const res = await fetch(
-          'https://discord.com/api/webhooks/1067981933449056258/VxgV33f0iUdJAhOKBdsALZAxTfHhVzWv-eTrMDPK4vjYL2rIZiBeegrzDoqgu4q_0QK1',
+            discordWebhook,
           {
             method: 'POST',
             headers: {
