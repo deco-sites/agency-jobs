@@ -51,3 +51,7 @@ SUPABASE_URL | SUPABASE_KEY | DISCORD_WEBHOOK
 ```sh
 deno task start
 ```
+
+## Funcionamento
+
+O serviço de pegar vagas e publicar elas estando no ar, agora é só programar como quer fazer isto ser executado. Podemos então fazer um servidor que se mantém operante e que de tempos em tempos faz a execução do GET e POST. Por exemplo, usando o [croner](https://deno.land/x/croner@4.3.15) 
