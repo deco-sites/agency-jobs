@@ -60,7 +60,7 @@ create table opportunities (
   description text,
   url text,
   source jsonb,
-  posted boolean,
+  posted boolean default false,
   PRIMARY KEY (_id)
 );
 ```
