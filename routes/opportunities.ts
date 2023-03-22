@@ -45,7 +45,7 @@ export const handler: Handlers = {
       const { data: opportunities, error } = await supabase
         .from('opportunities')
         .select('*')
-        .is('posted', false)
+        .not('posted', 'eq', true)
 
       if (error != null) {
         return Response.json({
